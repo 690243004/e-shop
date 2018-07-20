@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://code.alibabatech.com/schema/dubbo 
+		http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 配置controller扫描包 -->
+	<context:component-scan base-package="cn.e3mall.cart.controller"></context:component-scan>
+	<context:property-placeholder location="classpath:resource.properties" />
+	<!-- 读取配置文件 
+	<context:property-placeholder location="classpath:env.properties" />
+	-->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<!-- 配置处理器映射器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="cn.e3mall.cart.interceptor.LoginInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<!-- 解决静态资源无法被springMVC处理的问题 -->
+	<!-- 设置上传文件最大值   1M=1*1024*1024(B)=1048576 bytes -->    
+
+		<!-- 前缀 -->
+		<!-- 配置视图解析器 -->
+	<bean	class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 前缀 -->
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<!-- 后缀 -->
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<mvc:resources location="/css/" mapping="/css/**"/>
+	<mvc:resources location="/js/" mapping="/js/**"/>
+	<!-- 引用dubbo服务 -->
+	<dubbo:application name="e3-cart-web"/>
+	<dubbo:registry protocol="zookeeper" address="192.168.171.3:2181"/>
+	<dubbo:reference interface="cn.e3mall.service.ItemService" id="itemService"></dubbo:reference>
+	<dubbo:reference interface="cn.e3mall.sso.service.TokenService" id="tokenService"></dubbo:reference>
+	<dubbo:reference interface="cn.e3mall.cart.service.CartService" id="cartService"></dubbo:reference>
+</beans>
